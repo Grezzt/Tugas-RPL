@@ -27,12 +27,12 @@ if($_GET['aksi'] == "edit"){
 }
 
 if($_GET['aksi'] == "delete"){
-    $id_petugas = $_POST['id'];
+    $id_petugas = $_POST['id_jabatan'];
 
-    $hapus = $koneksi->prepare("CALL hapusPetugas('$id_petugas')");
+    $hapus = $koneksi->prepare("CALL hapusJabatan('$id_petugas')");
     $hapus->execute();
 
-    header("location:../petugas?page=petugas");
+    header("location:../petugas?page=jabatan");
 
 }
 

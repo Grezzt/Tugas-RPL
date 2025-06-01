@@ -29,7 +29,7 @@
             <td><?= $data['tunjangan'] ?></td>
             <td>
                 <a href="?page=edit_jabatan&id=<?= $data['id_jabatan'] ?>" class="btn btn-primary">EDIT</a>
-                <form action="../kontrol/kontrolMeja.php?aksi=delete" method="post" class="d-inline">
+                <form action="../kontrol/kontrolJabatan.php?aksi=delete" method="post" class="d-inline">
                     <input type="hidden" name="id_jabatan" value="<?= $data['id_jabatan'] ?>">
                     <button class="btn btn-danger" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')">DELETE</button>
                 </form>
