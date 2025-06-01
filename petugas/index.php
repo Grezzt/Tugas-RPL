@@ -62,7 +62,7 @@ require '../request.php';
       
 
     <li class="nav-item active">
-        <a class="nav-link" href="?page=pesanan">
+        <a class="nav-link" href="?page=jabatan">
           <i class="fas fa-fw "></i>
           <span>Jabatan</span></a>
       </li>

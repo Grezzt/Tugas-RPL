@@ -1,0 +1,41 @@
+<?php
+
+require '../request.php';
+
+if($_GET['aksi'] == "tambah"){
+    $username = $_POST['nama_jabatan'];
+    $nama_petugas = $_POST['gaji_pokok'];
+    $level = $_POST['tunjangan'];
+    $tambah = $koneksi->prepare("CALL tambahJabatan('$username', '$nama_petugas', '$level')");
+    $tambah->execute();
+
+    header("location:../petugas?page=jabatan");
+
+}
+
+if($_GET['aksi'] == "edit"){
+    $id_petugas = $_POST['id_jabatan'];
+    $username = $_POST['nama_jabatan'];
+    $nama_petugas = $_POST['gaji_pokok'];
+    $level = $_POST['tunjangan'];
+
+    $edit = $koneksi->prepare("CALL editJabatan('$id_petugas', '$username', '$nama_petugas', '$level')");
+    $edit->execute();
+
+    header("location:../petugas?page=jabatan");
+
+}
+
+if($_GET['aksi'] == "delete"){
+    $id_petugas = $_POST['id'];
+
+    $hapus = $koneksi->prepare("CALL hapusPetugas('$id_petugas')");
+    $hapus->execute();
+
+    header("location:../petugas?page=petugas");
+
+}
+
+
+
+?>
