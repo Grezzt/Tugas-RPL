@@ -3,15 +3,14 @@
 require '../request.php';
 
 if($_GET['aksi'] == "tambah"){
-    $username = $_POST['nama'];
-    $nama_petugas = $_POST['alamat'];
-    $level = $_POST['no_hp'];
-    $password = $_POST['id_jabatan'];
+    $username = $_POST['id_karyawan'];
+    $nama_petugas = $_POST['tanggal_gaji'];
+    $level = $_POST['total_gaji'];
 
-    $tambah = $koneksi->prepare("CALL tambahKaryawan('$username', '$nama_petugas', '$level', '$password')");
+    $tambah = $koneksi->prepare("CALL tambahGaji('$username', '$nama_petugas', '$level')");
     $tambah->execute();
 
-    header("location:../petugas?page=karyawan");
+    header("location:../petugas?page=penggajian");
 
 }
 
@@ -30,12 +29,12 @@ if($_GET['aksi'] == "edit"){
 }
 
 if($_GET['aksi'] == "delete"){
-    $id_petugas = $_POST['id_karyawan'];
+    $id_petugas = $_POST['id_gaji'];
 
-    $hapus = $koneksi->prepare("CALL hapusKaryawan('$id_petugas')");
+    $hapus = $koneksi->prepare("CALL hapusGaji('$id_petugas')");
     $hapus->execute();
 
-    header("location:../petugas?page=karyawan");
+    header("location:../petugas?page=penggajian");
 
 }
 

@@ -1,5 +1,5 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Edit Petugas</h1>
+    <h1 class="h3 mb-0 text-gray-800">Edit Karyawan</h1>
 </div>
 
 <?php
@@ -31,6 +31,7 @@ $data = $petugas->fetch();
                 }
                 ?>
             </select>
+            
     </table>
     <input type="hidden" name="id_jabatan" value="<?= $data['id_jabatan'] ?>">
     <button class="btn btn-primary w-100">Tambah</button>

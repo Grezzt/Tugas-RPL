@@ -68,7 +68,7 @@ require '../request.php';
       </li>
 
      <li class="nav-item active">
-        <a class="nav-link" href="?page=pesananuser">
+        <a class="nav-link" href="?page=penggajian">
           <i class="fas fa-fw "></i>
           <span>Penggajian</span></a>
       </li>

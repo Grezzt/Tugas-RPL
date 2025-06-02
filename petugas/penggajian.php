@@ -1,38 +1,35 @@
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dashboard Karyawan</h1>
+    <h1 class="h3 mb-0 text-gray-800">Dashboard Penggajian</h1>
 </div>
-<a href="?page=tambah_karyawan" class="btn btn-success mb-2">Tambah Karyawan +</a>
+<a href="?page=tambah_gaji" class="btn btn-success mb-2">Tambah Penggajian +</a>
 <div class="card">
 <div class="card-body">
     <table class="table">
         <tr>
             <td>No</td>
             <td>Nama</td>
-            <td>Alamat</td>
-            <td>No HP</td>
-            <td>Jabatan</td>
+            <td>Tanggal Gaji</td>
+            <td>Total Gaji</td>
             <td>Aksi</td>
         </tr>
 
         <?php
         
-            $absen = $koneksi->prepare("CALL getKaryawan()");
+            $absen = $koneksi->prepare("CALL getPenggajian()");
             $absen->execute();
 
             foreach ($absen->fetchAll() as $no => $data):
-
+            
         ?>
 
         <tr>
             <td><?= $no +1?></td>
             <td><?= $data['nama'] ?></td>
-            <td><?= $data['alamat'] ?></td>
-            <td><?= $data['no_hp'] ?></td>
-            <td><?= $data['nama_jabatan'] ?></td>
+            <td><?= $data['tanggal_gaji'] ?></td>
+            <td><?= $data['total_gaji'] ?></td>
             <td>
-                <a href="?page=edit_karyawan&id=<?= $data['id_karyawan'] ?>" class="btn btn-primary">EDIT</a>
-                <form action="../kontrol/kontrolKaryawan.php?aksi=delete" method="post" class="d-inline">
-                    <input type="hidden" name="id_karyawan" value="<?= $data['id_karyawan'] ?>">
+                <form action="../kontrol/kontrolGaji.php?aksi=delete" method="post" class="d-inline">
+                    <input type="hidden" name="id_gaji" value="<?= $data['id_gaji'] ?>">
                     <button class="btn btn-danger" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')">DELETE</button>
                 </form>
                 
