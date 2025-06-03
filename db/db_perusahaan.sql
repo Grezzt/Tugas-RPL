@@ -1,0 +1,378 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.0
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost:3306
+-- Generation Time: Jun 03, 2025 at 01:17 PM
+-- Server version: 8.0.30
+-- PHP Version: 8.1.10
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `db_perusahaan`
+--
+
+DELIMITER $$
+--
+-- Procedures
+--
+DROP PROCEDURE IF EXISTS `editJabatan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `editJabatan` (IN `id_jabatan` INT, IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL, IN `tunjangan` DECIMAL)   BEGIN
+
+UPDATE jabatan set jabatan.nama_jabatan = nama_jabatan,
+jabatan.gaji_pokok = gaji_pokok, jabatan.tunjangan = tunjangan
+WHERE jabatan.id_jabatan = id_jabatan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `getAbsen`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAbsen` ()   SELECT 
+        a.id_absensi,
+        k.nama,
+        a.tanggal,
+        a.jam_masuk,
+        a.jam_keluar
+    FROM absensi a
+    JOIN karyawan k ON a.id_karyawan = k.id_karyawan$$
+
+DROP PROCEDURE IF EXISTS `getJabatan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getJabatan` ()   BEGIN
+
+SELECT*FROM jabatan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `getJabatanId`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getJabatanId` (IN `id_jabatan` INT)   BEGIN
+
+SELECT*FROM jabatan where jabatan.id_jabatan = id_jabatan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `getkaryawan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getkaryawan` ()   SELECT 
+        a.id_karyawan,
+        a.nama,
+        a.alamat,
+        a.no_hp,
+        j.nama_jabatan
+    FROM karyawan a
+    JOIN jabatan j ON a.id_jabatan = j.id_jabatan$$
+
+DROP PROCEDURE IF EXISTS `getKaryawanId`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getKaryawanId` (IN `id_karyawan` INT(11))   BEGIN
+
+SELECT*FROM karyawan WHERE karyawan.id_karyawan=id_karyawan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `getLoginPetugas`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLoginPetugas` (IN `username` VARCHAR(255), IN `password` VARCHAR(255))   BEGIN
+
+SELECT*FROM admin 
+WHERE 
+admin.username = username AND
+admin.password = password;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `getPenggajian`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getPenggajian` ()   SELECT
+		a.id_gaji,
+        j.nama,
+        a.tanggal_gaji,
+        a.total_gaji
+    FROM penggajian a
+    JOIN karyawan j ON a.id_karyawan = j.id_karyawan$$
+
+DROP PROCEDURE IF EXISTS `hapusGaji`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusGaji` (IN `id_gaji` INT)   BEGIN
+
+DELETE FROM penggajian WHERE penggajian.id_gaji = id_gaji;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `hapusJabatan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusJabatan` (IN `id_jabatan` INT)   BEGIN
+
+DELETE FROM jabatan WHERE jabatan.id_jabatan = id_jabatan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `hapusKaryawan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusKaryawan` (IN `id_karyawan` INT)   BEGIN
+
+DELETE FROM karyawan WHERE karyawan.id_karyawan = id_karyawan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `tambahGaji`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahGaji` (IN `id_karyawan` INT, IN `tanggal_gaji` DATE, IN `total_gaji` DECIMAL)   BEGIN	
+
+INSERT INTO penggajian (penggajian.id_karyawan, penggajian.tanggal_gaji, penggajian.total_gaji)
+VALUES (id_karyawan, tanggal_gaji, total_gaji);
+
+END$$
+
+DROP PROCEDURE IF EXISTS `tambahJabatan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahJabatan` (IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL, IN `tunjangan` DECIMAL)   BEGIN
+
+INSERT INTO jabatan (jabatan.nama_jabatan,jabatan.gaji_pokok,jabatan.tunjangan)
+VALUES (nama_jabatan,gaji_pokok,tunjangan);
+
+END$$
+
+DROP PROCEDURE IF EXISTS `tambahKaryawan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahKaryawan` (IN `nama` VARCHAR(100), IN `alamat` TEXT, IN `no_hp` VARCHAR(25), IN `id_jabatan` INT)   BEGIN
+
+INSERT INTO karyawan (karyawan.nama, karyawan.alamat,karyawan.no_hp,karyawan.id_jabatan)
+VALUES (nama, alamat, no_hp, id_jabatan);
+
+END$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `absensi`
+--
+
+DROP TABLE IF EXISTS `absensi`;
+CREATE TABLE `absensi` (
+  `id_absensi` int NOT NULL,
+  `id_karyawan` int DEFAULT NULL,
+  `tanggal` date DEFAULT NULL,
+  `jam_masuk` time DEFAULT NULL,
+  `jam_keluar` time DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `absensi`:
+--   `id_karyawan`
+--       `karyawan` -> `id_karyawan`
+--
+
+--
+-- Dumping data for table `absensi`
+--
+
+INSERT INTO `absensi` (`id_absensi`, `id_karyawan`, `tanggal`, `jam_masuk`, `jam_keluar`) VALUES
+(6, 1, '2025-06-01', '21:54:15', '22:09:45');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin`
+--
+
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE `admin` (
+  `id` int NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `role` enum('admin','karyawan') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `admin`:
+--
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`id`, `username`, `password`, `role`) VALUES
+(1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 'admin');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `jabatan`
+--
+
+DROP TABLE IF EXISTS `jabatan`;
+CREATE TABLE `jabatan` (
+  `id_jabatan` int NOT NULL,
+  `nama_jabatan` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gaji_pokok` decimal(10,2) DEFAULT NULL,
+  `tunjangan` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `jabatan`:
+--
+
+--
+-- Dumping data for table `jabatan`
+--
+
+INSERT INTO `jabatan` (`id_jabatan`, `nama_jabatan`, `gaji_pokok`, `tunjangan`) VALUES
+(1, 'Manager', '8000000.00', '2000000.00'),
+(2, 'Staff', '5000000.00', '1000000.00'),
+(3, 'Magang', '2000000.00', '500000.00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `karyawan`
+--
+
+DROP TABLE IF EXISTS `karyawan`;
+CREATE TABLE `karyawan` (
+  `id_karyawan` int NOT NULL,
+  `nama` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `alamat` text COLLATE utf8mb4_general_ci,
+  `no_hp` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_jabatan` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `karyawan`:
+--   `id_jabatan`
+--       `jabatan` -> `id_jabatan`
+--
+
+--
+-- Dumping data for table `karyawan`
+--
+
+INSERT INTO `karyawan` (`id_karyawan`, `nama`, `alamat`, `no_hp`, `id_jabatan`) VALUES
+(1, 'Andi Saputra', 'Jl. Merdeka No. 10', '081234567890', 1),
+(2, 'Budi Santoso', 'Jl. Kenanga No. 20', '082345678901', 2),
+(3, 'Citra Lestari', 'Jl. Melati No. 30', '083456789012', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `penggajian`
+--
+
+DROP TABLE IF EXISTS `penggajian`;
+CREATE TABLE `penggajian` (
+  `id_gaji` int NOT NULL,
+  `id_karyawan` int DEFAULT NULL,
+  `tanggal_gaji` date DEFAULT NULL,
+  `total_gaji` decimal(12,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `penggajian`:
+--   `id_karyawan`
+--       `karyawan` -> `id_karyawan`
+--
+
+--
+-- Dumping data for table `penggajian`
+--
+
+INSERT INTO `penggajian` (`id_gaji`, `id_karyawan`, `tanggal_gaji`, `total_gaji`) VALUES
+(1, 1, '2025-06-02', '10000000.00'),
+(3, 3, '2025-06-02', '2500000.00');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `absensi`
+--
+ALTER TABLE `absensi`
+  ADD PRIMARY KEY (`id_absensi`),
+  ADD KEY `id_karyawan` (`id_karyawan`);
+
+--
+-- Indexes for table `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `jabatan`
+--
+ALTER TABLE `jabatan`
+  ADD PRIMARY KEY (`id_jabatan`);
+
+--
+-- Indexes for table `karyawan`
+--
+ALTER TABLE `karyawan`
+  ADD PRIMARY KEY (`id_karyawan`),
+  ADD KEY `id_jabatan` (`id_jabatan`);
+
+--
+-- Indexes for table `penggajian`
+--
+ALTER TABLE `penggajian`
+  ADD PRIMARY KEY (`id_gaji`),
+  ADD KEY `id_karyawan` (`id_karyawan`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `absensi`
+--
+ALTER TABLE `absensi`
+  MODIFY `id_absensi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `jabatan`
+--
+ALTER TABLE `jabatan`
+  MODIFY `id_jabatan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `karyawan`
+--
+ALTER TABLE `karyawan`
+  MODIFY `id_karyawan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `penggajian`
+--
+ALTER TABLE `penggajian`
+  MODIFY `id_gaji` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `absensi`
+--
+ALTER TABLE `absensi`
+  ADD CONSTRAINT `absensi_ibfk_1` FOREIGN KEY (`id_karyawan`) REFERENCES `karyawan` (`id_karyawan`);
+
+--
+-- Constraints for table `karyawan`
+--
+ALTER TABLE `karyawan`
+  ADD CONSTRAINT `karyawan_ibfk_1` FOREIGN KEY (`id_jabatan`) REFERENCES `jabatan` (`id_jabatan`);
+
+--
+-- Constraints for table `penggajian`
+--
+ALTER TABLE `penggajian`
+  ADD CONSTRAINT `penggajian_ibfk_1` FOREIGN KEY (`id_karyawan`) REFERENCES `karyawan` (`id_karyawan`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
