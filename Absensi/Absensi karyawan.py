@@ -44,7 +44,7 @@ def tampilkan_info(karyawan):
     text_info.insert(tk.END, f"ID       : {karyawan['id_karyawan']}\n")
     text_info.insert(tk.END, f"Nama     : {karyawan['nama']}\n")
     text_info.insert(tk.END, f"Jabatan  : {karyawan['nama_jabatan']}\n")
-    text_info.insert(tk.END, f"Gaji/Hari: Rp {(karyawan['gaji_pokok'] + karyawan['tunjangan']):,.2f}\n")
+    text_info.insert(tk.END, f"Gaji Pokok: Rp {(karyawan['gaji_pokok'] + karyawan['tunjangan']):,.2f}\n")
     text_info.insert(tk.END, f"Gaji Bulan Ini: Rp {total_gaji:,.2f}\n\n")
     text_info.insert(tk.END, "🕒 Riwayat Absensi:\n")
     for a in riwayat:
