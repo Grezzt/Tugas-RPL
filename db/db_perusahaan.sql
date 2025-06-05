@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 03, 2025 at 01:17 PM
+-- Generation Time: Jun 05, 2025 at 06:24 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -20,11 +20,21 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_perusahaan`
 --
+CREATE DATABASE IF NOT EXISTS `db_perusahaan` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `db_perusahaan`;
 
 DELIMITER $$
 --
 -- Procedures
 --
+DROP PROCEDURE IF EXISTS `editAdmin`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `editAdmin` (IN `p_id` INT, IN `p_username` VARCHAR(255), IN `p_password` VARCHAR(255), IN `p_role` ENUM('admin','karyawan'))   BEGIN
+
+UPDATE admin set admin.username = p_username, admin.password = p_password,
+admin.role = p_role WHERE admin.id = p_id;
+
+END$$
+
 DROP PROCEDURE IF EXISTS `editJabatan`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `editJabatan` (IN `id_jabatan` INT, IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL, IN `tunjangan` DECIMAL)   BEGIN
 
@@ -43,6 +53,20 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getAbsen` ()   SELECT
         a.jam_keluar
     FROM absensi a
     JOIN karyawan k ON a.id_karyawan = k.id_karyawan$$
+
+DROP PROCEDURE IF EXISTS `getAdmin`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAdmin` ()   BEGIN
+
+SELECT*FROM admin;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `getAdminId`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getAdminId` (IN `p_id` INT)   BEGIN
+
+SELECT*FROM admin WHERE admin.id = p_id;
+
+END$$
 
 DROP PROCEDURE IF EXISTS `getJabatan`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getJabatan` ()   BEGIN
@@ -94,6 +118,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getPenggajian` ()   SELECT
     FROM penggajian a
     JOIN karyawan j ON a.id_karyawan = j.id_karyawan$$
 
+DROP PROCEDURE IF EXISTS `hapusAdmin`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusAdmin` (IN `p_id` INT)   BEGIN
+
+DELETE FROM admin WHERE admin.id = p_id;
+
+END$$
+
 DROP PROCEDURE IF EXISTS `hapusGaji`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusGaji` (IN `id_gaji` INT)   BEGIN
 
@@ -112,6 +143,14 @@ DROP PROCEDURE IF EXISTS `hapusKaryawan`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `hapusKaryawan` (IN `id_karyawan` INT)   BEGIN
 
 DELETE FROM karyawan WHERE karyawan.id_karyawan = id_karyawan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `tambahAdmin`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahAdmin` (IN `p_username` VARCHAR(255), IN `p_password` VARCHAR(255), IN `p_role` ENUM('admin','karyawan'))   BEGIN
+
+INSERT INTO admin (admin.username,admin.password,admin.role)
+VALUES (p_username, p_password, p_role);
 
 END$$
 
@@ -157,12 +196,6 @@ CREATE TABLE `absensi` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- RELATIONSHIPS FOR TABLE `absensi`:
---   `id_karyawan`
---       `karyawan` -> `id_karyawan`
---
-
---
 -- Dumping data for table `absensi`
 --
 
@@ -184,15 +217,12 @@ CREATE TABLE `admin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- RELATIONSHIPS FOR TABLE `admin`:
---
-
---
 -- Dumping data for table `admin`
 --
 
 INSERT INTO `admin` (`id`, `username`, `password`, `role`) VALUES
-(1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 'admin');
+(1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 'admin'),
+(3, 'atnan', '2001e7338c40af1c06cdc6d536e47744', 'karyawan');
 
 -- --------------------------------------------------------
 
@@ -207,10 +237,6 @@ CREATE TABLE `jabatan` (
   `gaji_pokok` decimal(10,2) DEFAULT NULL,
   `tunjangan` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- RELATIONSHIPS FOR TABLE `jabatan`:
---
 
 --
 -- Dumping data for table `jabatan`
@@ -237,12 +263,6 @@ CREATE TABLE `karyawan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- RELATIONSHIPS FOR TABLE `karyawan`:
---   `id_jabatan`
---       `jabatan` -> `id_jabatan`
---
-
---
 -- Dumping data for table `karyawan`
 --
 
@@ -264,12 +284,6 @@ CREATE TABLE `penggajian` (
   `tanggal_gaji` date DEFAULT NULL,
   `total_gaji` decimal(12,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- RELATIONSHIPS FOR TABLE `penggajian`:
---   `id_karyawan`
---       `karyawan` -> `id_karyawan`
---
 
 --
 -- Dumping data for table `penggajian`
@@ -330,7 +344,7 @@ ALTER TABLE `absensi`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `jabatan`

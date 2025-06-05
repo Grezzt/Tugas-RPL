@@ -53,6 +53,14 @@ require '../request.php';
           <span>Absensi</span></a>
       </li>
 
+
+      <li class="nav-item active">
+        <a class="nav-link" href="?page=admin">
+          <i class="fas fa-fw "></i>
+          <span>Admin</span></a>
+      </li>
+
+
       <li class="nav-item active">
         <a class="nav-link" href="?page=karyawan">
           <i class="fas fa-fw "></i>
