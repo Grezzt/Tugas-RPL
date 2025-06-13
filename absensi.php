@@ -49,7 +49,7 @@ date_default_timezone_set('Asia/Jakarta');
             $tanggal = date('Y-m-d');
             $jam = date('H:i:s');
             // Cek karyawan
-            $q = mysqli_query($koneksi, "SELECT k.*, j.nama_jabatan, j.gaji_pokok, j.tunjangan FROM karyawan k JOIN jabatan j ON k.id_jabatan=j.id_jabatan WHERE k.id_karyawan=$id_karyawan");
+            $q = mysqli_query($koneksi, "SELECT k.*, j.nama_jabatan, j.gaji_pokok FROM karyawan k JOIN jabatan j ON k.id_jabatan=j.id_jabatan WHERE k.id_karyawan=$id_karyawan");
             $karyawan = mysqli_fetch_assoc($q);
             if (!$karyawan) {
               $pesan = "<div class='alert alert-danger'>ID Karyawan tidak ditemukan.</div>";
@@ -76,7 +76,24 @@ date_default_timezone_set('Asia/Jakarta');
               $bulan_ini = date('Y-m');
               $q_jumlah = mysqli_query($koneksi, "SELECT COUNT(*) as jumlah FROM absensi WHERE id_karyawan=$id_karyawan AND DATE_FORMAT(tanggal, '%Y-%m')='$bulan_ini'");
               $jumlah_hari = mysqli_fetch_assoc($q_jumlah)['jumlah'];
-              $total_gaji = ($karyawan['gaji_pokok'] + $karyawan['tunjangan']) * $jumlah_hari;
+              $total_gaji = $karyawan['gaji_pokok'] * $jumlah_hari;
+
+              // gaji perbulan berdasarkan jumlah tunjangan dan gaji pokok
+              
+              if ($karyawan['status_perkawinan'] == 'nikah') {
+                $tunjangan_perkawinan = ($total_gaji * 0.2); // 20% dari gaji pokok
+              } else {
+                $tunjangan_perkawinan = 0;
+              }
+
+              if ($karyawan['jumlah_anak'] >= 1) {
+                $tunjangan_anak = ($total_gaji * 0.075 * $karyawan['jumlah_anak']); // 20% per anak
+              } else {
+                $tunjangan_anak = 0;
+              }
+
+              $jumlahTunjangan = $tunjangan_anak + $tunjangan_perkawinan;
+              $jumlahTotalGaji = $tunjangan_anak + $tunjangan_perkawinan + $total_gaji;
 
               $q_riwayat = mysqli_query($koneksi, "SELECT tanggal, jam_masuk, jam_keluar FROM absensi WHERE id_karyawan=$id_karyawan ORDER BY tanggal DESC LIMIT 10");
 
@@ -84,9 +101,15 @@ date_default_timezone_set('Asia/Jakarta');
               $info .= "<h5>Profil Karyawan</h5>";
               $info .= "<table class='table table-sm'><tr><td>ID</td><td>{$karyawan['id_karyawan']}</td></tr>";
               $info .= "<tr><td>Nama</td><td>{$karyawan['nama']}</td></tr>";
+              $info .= "<tr><td>Jumlah Anak</td><td>{$karyawan['jumlah_anak']}</td></tr>";
+              $info .= "<tr><td>Status Perkawinan</td><td>{$karyawan['status_perkawinan']}</td></tr>";
               $info .= "<tr><td>Jabatan</td><td>{$karyawan['nama_jabatan']}</td></tr>";
-              $info .= "<tr><td>Gaji Pokok</td><td>Rp " . number_format($karyawan['gaji_pokok'] + $karyawan['tunjangan'], 2, ',', '.') . "</td></tr>";
-              $info .= "<tr><td>Gaji Bulan Ini</td><td>Rp " . number_format($total_gaji, 2, ',', '.') . "</td></tr></table>";
+              $info .= "<tr><td>Gaji Pokok per hari</td><td>Rp " . number_format($karyawan['gaji_pokok'], 2, ',', '.') . "</td></tr>";
+              $info .= "<tr><td>Tunjangan Anak Bulan ini</td><td>Rp ". number_format($tunjangan_anak, 2, ',', '.') . "</td></tr>";
+              $info .= "<tr><td>Tunjangan Perkawinan Bulan ini</td><td>Rp " . number_format($tunjangan_perkawinan, 2, ',', '.') . "</td></tr>";
+              $info .= "<tr><td>Total Tunjangan</td><td>Rp " . number_format($jumlahTunjangan, 2, ',', '.') . "</td></tr>";
+              $info .= "<tr><td>Gaji Bulan Ini</td><td>Rp " . number_format($jumlahTotalGaji, 2, ',', '.') . "</td></tr></table>";
+              $info .= "<tr><td><h6><b>Riwayat Absensi bulan ini</td></tr>: ". number_format($jumlah_hari, 0, ',', '.') . " hari </b></h6></td></tr>";
 
               $info .= "<h6>Riwayat Absensi (10 Terakhir)</h6>";
               $info .= "<table class='table table-bordered table-sm'><thead><tr><th>Tanggal</th><th>Masuk</th><th>Keluar</th></tr></thead><tbody>";

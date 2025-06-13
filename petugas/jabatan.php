@@ -9,7 +9,6 @@
             <td>No</td>
             <td>Jabatan</td>
             <td>Gaji Pokok</td>
-            <td>Tunjangan</td>
             <td>Aksi</td>
         </tr>
 
@@ -26,7 +25,6 @@
             <td><?= $no +1?></td>
             <td><?= $data['nama_jabatan'] ?></td>
             <td><?= $data['gaji_pokok'] ?></td>
-            <td><?= $data['tunjangan'] ?></td>
             <td>
                 <a href="?page=edit_jabatan&id=<?= $data['id_jabatan'] ?>" class="btn btn-primary">EDIT</a>
                 <form action="../kontrol/kontrolJabatan.php?aksi=delete" method="post" class="d-inline">

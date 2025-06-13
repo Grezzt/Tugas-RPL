@@ -12,6 +12,27 @@ include '../koneksi.php';
             <input required type="text" name="nama" class="form-control mb-2" placeholder="Masukan Nama">
             <input required type="text" name="alamat" class="form-control mb-2" placeholder="Masukan Alamat">
             <input required type="text" name="no_hp" class="form-control mb-2" placeholder="Masukan No HP">
+            <input required type="number" name="jumlah_anak" class="form-control mb-2" placeholder="Masukan Jumlah Anak">
+
+            <select required name="status_perkawinan" class="form-control mb-2">
+                <option value="">-- Pilih Status Perkawinan --</option>
+                <?php
+                $query_status = mysqli_query($koneksi, "SELECT DISTINCT status_perkawinan FROM karyawan");
+                if ($query_status && mysqli_num_rows($query_status) > 0) {
+                    while ($data_status = mysqli_fetch_assoc($query_status)) {
+                ?>
+                        <option value="<?php echo htmlspecialchars($data_status['status_perkawinan']); ?>">
+                            <?php echo htmlspecialchars($data_status['status_perkawinan']); ?>
+                        </option>
+                    <?php
+                    }
+                } else {
+                    ?>
+                    <option value="">Tidak ada data status perkawinan</option>
+                <?php
+                }
+                ?>
+            </select>
 
             <select required name="id_jabatan" class="form-control mb-2">
                 <option value="">-- Pilih Jabatan --</option>

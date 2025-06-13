@@ -18,7 +18,6 @@ $data = $petugas->fetch();
     <table class="table">
             <input type="text" name="nama_jabatan" class="form-control mb-2" placeholder="Masukan Nomer Jabatan" value="<?= $data['nama_jabatan'] ?>">
             <input type="text" name="gaji_pokok" class="form-control mb-2" placeholder="Masukan Gaji Pokok" value="<?= $data['gaji_pokok'] ?>" >
-            <input type="text" name="tunjangan" class="form-control mb-2" placeholder="Masukan Tunjangan" value="<?= $data['tunjangan'] ?>" >
             
     </table>
     <input type="hidden" name="id_jabatan" value="<?= $data['id_jabatan'] ?>">

@@ -7,7 +7,6 @@
         <form action="../kontrol/kontrolJabatan.php?aksi=tambah" method="post">
             <input required type="text" name="nama_jabatan" class="form-control mb-2" placeholder="Masukan Jabatan">
             <input required type="text" name="gaji_pokok" class="form-control mb-2" placeholder="Masukan Gaji Pokok">
-            <input required type="text" name="tunjangan" class="form-control mb-2" placeholder="Masukan Tunjangan">
 
 
             <button class="btn btn-primary w-100">Tambah</button>

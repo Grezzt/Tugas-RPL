@@ -19,6 +19,13 @@ $data = $petugas->fetch();
             <input type="text" name="nama" class="form-control mb-2" placeholder="Masukan Nomer Meja" value="<?= $data['nama'] ?>">
             <input type="text" name="alamat" class="form-control mb-2" placeholder="Masukan Alamat" value="<?= $data['alamat'] ?>" >
             <input type="text" name="no_hp" class="form-control mb-2" placeholder="Masukan No HP" value="<?= $data['no_hp'] ?>" >
+            <input type="number" name="jumlah_anak" class="form-control mb-2" placeholder="Masukan Jumlah Anak" value="<?= $data['jumlah_anak'] ?>" >
+            
+            <select name="Status_perkawinan" class="form-control mb-2">
+                <option <?= $data['status_perkawinan'] == "nikah" ? "selected" : "" ; ?> value="nikah">Nikah</option>
+                <option <?= $data['status_perkawinan'] == "belum" ? "selected" : "" ; ?> value="belum">Belum</option>
+            </select>
+
             <select name="id_jabatan" class="form-control mb-2">
                 <?php
                     $kel = mysqli_query($koneksi, "SELECT*FROM jabatan");
