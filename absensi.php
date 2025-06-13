@@ -1,6 +1,8 @@
 <?php
 include 'koneksi.php';
 
+date_default_timezone_set('Asia/Jakarta');
+
 $pesan = ""; 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id_karyawan'])) {

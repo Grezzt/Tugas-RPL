@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 05, 2025 at 06:24 PM
+-- Generation Time: Jun 13, 2025 at 02:49 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_perusahaan`
 --
-CREATE DATABASE IF NOT EXISTS `db_perusahaan` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-USE `db_perusahaan`;
 
 DELIMITER $$
 --
@@ -36,11 +34,20 @@ admin.role = p_role WHERE admin.id = p_id;
 END$$
 
 DROP PROCEDURE IF EXISTS `editJabatan`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `editJabatan` (IN `id_jabatan` INT, IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL, IN `tunjangan` DECIMAL)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `editJabatan` (IN `id_jabatan` INT, IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL)   BEGIN
 
 UPDATE jabatan set jabatan.nama_jabatan = nama_jabatan,
-jabatan.gaji_pokok = gaji_pokok, jabatan.tunjangan = tunjangan
+jabatan.gaji_pokok = gaji_pokok
 WHERE jabatan.id_jabatan = id_jabatan;
+
+END$$
+
+DROP PROCEDURE IF EXISTS `editKaryawan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `editKaryawan` (IN `p_id` INT, IN `p_nama` VARCHAR(255), IN `p_alamat` TEXT, IN `p_nohp` VARCHAR(16), IN `p_jmlank` INT, IN `p_stsprkwn` ENUM('nikah','belum'), IN `p_jabatan` INT)   BEGIN		
+
+UPDATE karyawan SET karyawan.nama = p_nama, karyawan.alamat = p_alamat,
+karyawan.no_hp = p_nohp, karyawan.jumlah_anak = p_jmlank,karyawan.status_perkawinan = p_stsprkwn,
+karyawan.id_jabatan = p_jabatan WHERE karyawan.id_karyawan = p_id;
 
 END$$
 
@@ -84,13 +91,16 @@ END$$
 
 DROP PROCEDURE IF EXISTS `getkaryawan`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getkaryawan` ()   SELECT 
-        a.id_karyawan,
-        a.nama,
-        a.alamat,
-        a.no_hp,
-        j.nama_jabatan
-    FROM karyawan a
-    JOIN jabatan j ON a.id_jabatan = j.id_jabatan$$
+    a.id_karyawan,
+    a.nama,
+    a.alamat,
+    a.no_hp,
+    a.jumlah_anak,
+    a.status_perkawinan,
+    j.nama_jabatan,
+    a.id_jabatan
+FROM karyawan a
+JOIN jabatan j ON a.id_jabatan = j.id_jabatan$$
 
 DROP PROCEDURE IF EXISTS `getKaryawanId`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getKaryawanId` (IN `id_karyawan` INT(11))   BEGIN
@@ -98,6 +108,13 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `getKaryawanId` (IN `id_karyawan` IN
 SELECT*FROM karyawan WHERE karyawan.id_karyawan=id_karyawan;
 
 END$$
+
+DROP PROCEDURE IF EXISTS `getLoginKaryawan`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `getLoginKaryawan` (IN `p_nama` VARCHAR(255), IN `p_password` VARCHAR(255))   SELECT * 
+FROM karyawan
+WHERE 
+  CONVERT(nama USING utf8mb4) = p_nama AND 
+  CONVERT(password USING utf8mb4) = p_password$$
 
 DROP PROCEDURE IF EXISTS `getLoginPetugas`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getLoginPetugas` (IN `username` VARCHAR(255), IN `password` VARCHAR(255))   BEGIN
@@ -163,18 +180,18 @@ VALUES (id_karyawan, tanggal_gaji, total_gaji);
 END$$
 
 DROP PROCEDURE IF EXISTS `tambahJabatan`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahJabatan` (IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL, IN `tunjangan` DECIMAL)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahJabatan` (IN `nama_jabatan` VARCHAR(50), IN `gaji_pokok` DECIMAL)   BEGIN
 
-INSERT INTO jabatan (jabatan.nama_jabatan,jabatan.gaji_pokok,jabatan.tunjangan)
-VALUES (nama_jabatan,gaji_pokok,tunjangan);
+INSERT INTO jabatan (jabatan.nama_jabatan,jabatan.gaji_pokok)
+VALUES (nama_jabatan,gaji_pokok);
 
 END$$
 
 DROP PROCEDURE IF EXISTS `tambahKaryawan`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahKaryawan` (IN `nama` VARCHAR(100), IN `alamat` TEXT, IN `no_hp` VARCHAR(25), IN `id_jabatan` INT)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `tambahKaryawan` (IN `nama` VARCHAR(100), IN `alamat` TEXT, IN `no_hp` VARCHAR(25), IN `jumlah_anak` INT, IN `status_perkawinan` ENUM('nikah','belum'), IN `id_jabatan` INT)   BEGIN
 
-INSERT INTO karyawan (karyawan.nama, karyawan.alamat,karyawan.no_hp,karyawan.id_jabatan)
-VALUES (nama, alamat, no_hp, id_jabatan);
+INSERT INTO karyawan (karyawan.nama, karyawan.alamat,karyawan.no_hp, karyawan.jumlah_anak,karyawan.status_perkawinan,karyawan.id_jabatan)
+VALUES (nama, alamat, no_hp, jumlah_anak, status_perkawinan, id_jabatan);
 
 END$$
 
@@ -200,7 +217,9 @@ CREATE TABLE `absensi` (
 --
 
 INSERT INTO `absensi` (`id_absensi`, `id_karyawan`, `tanggal`, `jam_masuk`, `jam_keluar`) VALUES
-(6, 1, '2025-06-01', '21:54:15', '22:09:45');
+(18, 6, '2025-06-13', '14:31:22', '14:31:25'),
+(19, 1, '2025-06-13', '21:39:14', '21:39:17'),
+(20, 8, '2025-06-13', '21:41:53', '21:41:57');
 
 -- --------------------------------------------------------
 
@@ -222,7 +241,8 @@ CREATE TABLE `admin` (
 
 INSERT INTO `admin` (`id`, `username`, `password`, `role`) VALUES
 (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', 'admin'),
-(3, 'atnan', '2001e7338c40af1c06cdc6d536e47744', 'karyawan');
+(3, 'atnan', '2001e7338c40af1c06cdc6d536e47744', 'karyawan'),
+(4, 'damar', '25d55ad283aa400af464c76d713c07ad', 'karyawan');
 
 -- --------------------------------------------------------
 
@@ -233,19 +253,18 @@ INSERT INTO `admin` (`id`, `username`, `password`, `role`) VALUES
 DROP TABLE IF EXISTS `jabatan`;
 CREATE TABLE `jabatan` (
   `id_jabatan` int NOT NULL,
-  `nama_jabatan` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `gaji_pokok` decimal(10,2) DEFAULT NULL,
-  `tunjangan` decimal(10,2) DEFAULT NULL
+  `nama_jabatan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gaji_pokok` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `jabatan`
 --
 
-INSERT INTO `jabatan` (`id_jabatan`, `nama_jabatan`, `gaji_pokok`, `tunjangan`) VALUES
-(1, 'Manager', '8000000.00', '2000000.00'),
-(2, 'Staff', '5000000.00', '1000000.00'),
-(3, 'Magang', '2000000.00', '500000.00');
+INSERT INTO `jabatan` (`id_jabatan`, `nama_jabatan`, `gaji_pokok`) VALUES
+(1, 'Manager', '350000.00'),
+(2, 'Staff', '200000.00'),
+(3, 'Magang', '80000.00');
 
 -- --------------------------------------------------------
 
@@ -256,9 +275,12 @@ INSERT INTO `jabatan` (`id_jabatan`, `nama_jabatan`, `gaji_pokok`, `tunjangan`) 
 DROP TABLE IF EXISTS `karyawan`;
 CREATE TABLE `karyawan` (
   `id_karyawan` int NOT NULL,
-  `nama` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `alamat` text COLLATE utf8mb4_general_ci,
-  `no_hp` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `alamat` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `no_hp` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `jumlah_anak` int DEFAULT NULL,
+  `status_perkawinan` enum('nikah','belum') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `id_jabatan` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -266,10 +288,14 @@ CREATE TABLE `karyawan` (
 -- Dumping data for table `karyawan`
 --
 
-INSERT INTO `karyawan` (`id_karyawan`, `nama`, `alamat`, `no_hp`, `id_jabatan`) VALUES
-(1, 'Andi Saputra', 'Jl. Merdeka No. 10', '081234567890', 1),
-(2, 'Budi Santoso', 'Jl. Kenanga No. 20', '082345678901', 2),
-(3, 'Citra Lestari', 'Jl. Melati No. 30', '083456789012', 3);
+INSERT INTO `karyawan` (`id_karyawan`, `nama`, `password`, `alamat`, `no_hp`, `jumlah_anak`, `status_perkawinan`, `id_jabatan`) VALUES
+(1, 'Andi Saputra', 'ce0e5bf55e4f71749eade7a8b95c4e46', 'Jl. Merdeka No. 10', '081234567890', 1, 'nikah', 1),
+(2, 'Budi Santoso', '00dfc53ee86af02e742515cdcf075ed3', 'Jl. Kenanga No. 20', '082345678901', 3, 'nikah', 2),
+(3, 'Citra Lestari', 'e260eab6a7c45d139631f72b55d8506b', 'Jl. Melati No. 30', '083456789012', 0, 'belum', 3),
+(6, 'ridho', '926a161c6419512d711089538c80ac70', 'bantul', '08598127837', 2, 'nikah', 1),
+(7, 'dika', 'e9ce15bcebcedde2cb3cf9fe8f84fc0c', 'kuningan', '098764521', 3, 'belum', 2),
+(8, 'Damar', 'dd28a856e0e04daf04cd11322a0835aa', 'godean', '08598127834', 5, 'nikah', 2),
+(12, 'Atnan', '30a9817a75c15f627b2afd53ae1cec90', 'Brebes', '08080808080', 12, 'nikah', 1);
 
 -- --------------------------------------------------------
 
@@ -291,7 +317,8 @@ CREATE TABLE `penggajian` (
 
 INSERT INTO `penggajian` (`id_gaji`, `id_karyawan`, `tanggal_gaji`, `total_gaji`) VALUES
 (1, 1, '2025-06-02', '10000000.00'),
-(3, 3, '2025-06-02', '2500000.00');
+(3, 3, '2025-06-02', '2500000.00'),
+(4, 2, '2025-07-02', '6000000.00');
 
 --
 -- Indexes for dumped tables
@@ -338,31 +365,31 @@ ALTER TABLE `penggajian`
 -- AUTO_INCREMENT for table `absensi`
 --
 ALTER TABLE `absensi`
-  MODIFY `id_absensi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_absensi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `jabatan`
 --
 ALTER TABLE `jabatan`
-  MODIFY `id_jabatan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_jabatan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `karyawan`
 --
 ALTER TABLE `karyawan`
-  MODIFY `id_karyawan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_karyawan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `penggajian`
 --
 ALTER TABLE `penggajian`
-  MODIFY `id_gaji` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_gaji` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables

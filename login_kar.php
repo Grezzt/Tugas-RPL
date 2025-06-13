@@ -48,6 +48,7 @@
                       <input type="password" class="form-control form-control-user" name="password" placeholder="Enter Password">
                     </div>
                     <button class="btn btn-primary btn-user btn-block">Login</button>
+                    <a href="absensi.php" class="btn btn-danger btn-user btn-block">Absen</a>
                     
                   </form>
                   <hr>
