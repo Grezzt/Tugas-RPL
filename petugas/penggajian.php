@@ -10,7 +10,6 @@
             <td>Nama</td>
             <td>Tanggal Gaji</td>
             <td>Total Gaji</td>
-            <td>Aksi</td>
         </tr>
 
         <?php
@@ -26,14 +25,9 @@
             <td><?= $no +1?></td>
             <td><?= $data['nama'] ?></td>
             <td><?= $data['tanggal_gaji'] ?></td>
-            <td><?= $data['total_gaji'] ?></td>
-            <td>
-                <form action="../kontrol/kontrolGaji.php?aksi=delete" method="post" class="d-inline">
-                    <input type="hidden" name="id_gaji" value="<?= $data['id_gaji'] ?>">
-                    <button class="btn btn-danger" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')">DELETE</button>
-                </form>
-                
-            </td>
+            <td>Rp <?= number_format($data['total_gaji'], 0, ',', '.') ?></td>
+
+            
         </tr>
 
         <?php

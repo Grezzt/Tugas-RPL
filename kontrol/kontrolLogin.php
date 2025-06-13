@@ -29,4 +29,32 @@ if($_GET['aksi'] == "loginPetugas"){
     header("location:../login.php");
     exit;
 }
+
+
+
+if($_GET['aksi'] == "loginKaryawan"){
+    $nama = $_POST['nama'];
+    $password = md5($_POST['password']);
+
+    $hasil = $koneksi->prepare("CALL getLoginKaryawan('$nama', '$password')");
+    $hasil->execute();
+
+    $siswa = $hasil->fetch();
+
+    if($siswa){     
+        $_SESSION['USER']['id_karyawan'] = $siswa['id_karyawan'];
+        $_SESSION['USER']['nama'] = $siswa['nama'];
+    
+
+    header("location:../karyawan?page=gaji");
+
+    }else{
+        echo "<script>alert('Username / Password Salah'); window.location= '../login_kar.php' </script>";
+    }
+
+} elseif($_GET['aksi'] == "logoutK"){
+    session_destroy();
+    header("location:../login_kar.php");
+    exit;
+}
 ?>
