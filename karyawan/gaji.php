@@ -1,138 +1,129 @@
 <?php
-$info = "";
-$pesan = ""; // Untuk pesan clock in/out
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id_karyawan'])) {
-  $id_karyawan = intval($_POST['id_karyawan']);
-  $tanggal = date('Y-m-d');
-  $jam = date('H:i:s');
-  // Cek karyawan
-  $q = mysqli_query($koneksi, "SELECT k.*, j.nama_jabatan, j.gaji_pokok FROM karyawan k JOIN jabatan j ON k.id_jabatan=j.id_jabatan WHERE k.id_karyawan=$id_karyawan");
-  $karyawan = mysqli_fetch_assoc($q);
-  if (!$karyawan) {
-    $pesan = "<div class='alert alert-danger'>ID Karyawan tidak ditemukan.</div>";
-  } else {
-    if (isset($_POST['clock_in'])) {
-      $cek = mysqli_query($koneksi, "SELECT * FROM absensi WHERE id_karyawan=$id_karyawan AND tanggal='$tanggal'");
-      if (mysqli_num_rows($cek) > 0) {
-        $pesan = "<div class='alert alert-warning'>Anda sudah melakukan Clock In hari ini.</div>";
-      } else {
-        mysqli_query($koneksi, "INSERT INTO absensi (id_karyawan, tanggal, jam_masuk) VALUES ($id_karyawan, '$tanggal', '$jam')");
-        $pesan = "<div class='alert alert-success'>Clock In berhasil pada $jam</div>";
-      }
-    } elseif (isset($_POST['clock_out'])) {
-      $cek = mysqli_query($koneksi, "SELECT * FROM absensi WHERE id_karyawan=$id_karyawan AND tanggal='$tanggal' AND jam_keluar IS NULL");
-      if (mysqli_num_rows($cek) == 0) {
-        $pesan = "<div class='alert alert-warning'>Anda belum Clock In atau sudah Clock Out hari ini.</div>";
-      } else {
-        mysqli_query($koneksi, "UPDATE absensi SET jam_keluar='$jam' WHERE id_karyawan=$id_karyawan AND tanggal='$tanggal' AND jam_keluar IS NULL");
-        $pesan = "<div class='alert alert-success'>Clock Out berhasil pada $jam</div>";
-      }
-    }
+// Ambil ID karyawan dari session
+$id_karyawan = $_SESSION['USER']['id_karyawan'] ?? null;
+$nama_karyawan = $_SESSION['USER']['nama'] ?? '';
 
-    // Info karyawan dan riwayat absensi
-    $bulan_ini = date('Y-m');
-    $q_jumlah = mysqli_query($koneksi, "SELECT COUNT(*) as jumlah FROM absensi WHERE id_karyawan=$id_karyawan AND DATE_FORMAT(tanggal, '%Y-%m')='$bulan_ini'");
-    $jumlah_hari = mysqli_fetch_assoc($q_jumlah)['jumlah'];
-    $total_gaji = $karyawan['gaji_pokok'] * $jumlah_hari;
-
-    // gaji perbulan berdasarkan jumlah tunjangan dan gaji pokok
-    
-    if ($karyawan['status_perkawinan'] == 'nikah') {
-      $tunjangan_perkawinan = ($total_gaji * 0.2); // 20% dari gaji pokok
-    } else {
-      $tunjangan_perkawinan = 0;
-    }
-
-    if ($karyawan['jumlah_anak'] >= 1) {
-      $tunjangan_anak = ($total_gaji * 0.075 * $karyawan['jumlah_anak']); // 20% per anak
-    } else {
-      $tunjangan_anak = 0;
-    }
-
-    $jumlahTunjangan = $tunjangan_anak + $tunjangan_perkawinan;
-    $jumlahTotalGaji = $tunjangan_anak + $tunjangan_perkawinan + $total_gaji;
-
-    $q_riwayat = mysqli_query($koneksi, "SELECT tanggal, jam_masuk, jam_keluar FROM absensi WHERE id_karyawan=$id_karyawan ORDER BY tanggal DESC LIMIT 10");
-
-    $info .= "<div class='mt-3'>";
-    $info .= "<h5>Profil Karyawan</h5>";
-    $info .= "<table class='table table-sm'><tr><td>ID</td><td>{$karyawan['id_karyawan']}</td></tr>";
-    $info .= "<tr><td>Nama</td><td>{$karyawan['nama']}</td></tr>";
-    $info .= "<tr><td>Jumlah Anak</td><td>{$karyawan['jumlah_anak']}</td></tr>";
-    $info .= "<tr><td>Status Perkawinan</td><td>{$karyawan['status_perkawinan']}</td></tr>";
-    $info .= "<tr><td>Jabatan</td><td>{$karyawan['nama_jabatan']}</td></tr>";
-    $info .= "<tr><td>Gaji Pokok per hari</td><td>Rp " . number_format($karyawan['gaji_pokok'], 2, ',', '.') . "</td></tr>";
-    $info .= "<tr><td>Tunjangan Anak Bulan ini</td><td>Rp ". number_format($tunjangan_anak, 2, ',', '.') . "</td></tr>";
-    $info .= "<tr><td>Tunjangan Perkawinan Bulan ini</td><td>Rp " . number_format($tunjangan_perkawinan, 2, ',', '.') . "</td></tr>";
-    $info .= "<tr><td>Total Tunjangan</td><td>Rp " . number_format($jumlahTunjangan, 2, ',', '.') . "</td></tr>";
-    $info .= "<tr><td>Gaji Bulan Ini</td><td>Rp " . number_format($jumlahTotalGaji, 2, ',', '.') . "</td></tr></table>";
-    $info .= "<tr><td><h6><b>Riwayat Absensi bulan ini</td></tr>: ". number_format($jumlah_hari, 0, ',', '.') . " hari </b></h6></td></tr>";
-
-    $info .= "<h6>Riwayat Absensi (10 Terakhir)</h6>";
-    $info .= "<table class='table table-bordered table-sm'><thead><tr><th>Tanggal</th><th>Masuk</th><th>Keluar</th></tr></thead><tbody>";
-    while ($a = mysqli_fetch_assoc($q_riwayat)) {
-      $keluar = $a['jam_keluar'] ? $a['jam_keluar'] : "<span class='text-danger'>Belum Clock Out</span>";
-      $info .= "<tr><td>{$a['tanggal']}</td><td>{$a['jam_masuk']}</td><td>{$keluar}</td></tr>";
-    }
-    $info .= "</tbody></table>";
-    $info .= "</div>";
-  }
+// Jika tidak ada id_karyawan di session, hentikan
+if (!$id_karyawan) {
+    die("Anda belum login atau session telah habis.");
 }
-// Tampilkan info karyawan dulu, lalu pesan clock in/out di bawahnya
-echo $info;
-echo $pesan;
 
+// Ambil data lengkap karyawan dengan prepared statement untuk keamanan
+$stmt = $koneksi->prepare("
+    SELECT k.*, j.nama_jabatan, j.gaji_pokok 
+    FROM karyawan k 
+    JOIN jabatan j ON k.id_jabatan = j.id_jabatan 
+    WHERE k.id_karyawan = :id_karyawan
+");
+$stmt->execute(['id_karyawan' => $id_karyawan]);
+$data = $stmt->fetch();
+
+if (!$data) {
+    die("Data karyawan tidak ditemukan.");
+}
+
+// Hitung gaji dan tunjangan bulan ini
+$bulan_ini = date('Y-m');
+$stmt2 = $koneksi->prepare("
+    SELECT COUNT(*) AS jumlah 
+    FROM absensi 
+    WHERE id_karyawan = :id_karyawan 
+      AND DATE_FORMAT(tanggal, '%Y-%m') = :bulan_ini
+");
+$stmt2->execute([
+    'id_karyawan' => $id_karyawan,
+    'bulan_ini' => $bulan_ini
+]);
+$jumlah_hari = $stmt2->fetch()['jumlah'] ?? 0;
+
+$gaji_pokok = $data['gaji_pokok'];
+$total_gaji = $gaji_pokok * $jumlah_hari;
+
+// Hitung tunjangan
+$tunjangan_anak = ($data['jumlah_anak'] > 0) ? $total_gaji * 0.075 * $data['jumlah_anak'] : 0;
+$tunjangan_perkawinan = (strtolower($data['status_perkawinan']) === 'nikah') ? $total_gaji * 0.2 : 0;
+$total_tunjangan = $tunjangan_anak + $tunjangan_perkawinan;
+$total_gaji_bulanan = $total_gaji + $total_tunjangan;
 ?>
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Slip Gaji Karyawan</title>
+  <link href="./template/SB Admin 2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+  <link href="./template/SB Admin 2/css/sb-admin-2.min.css" rel="stylesheet" />
+  <style>
+    .table td, .table th {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-light">
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Slip Gaji </h1>
-</div>
-<tr>
-    <td width="200">Nama</td>
-    <td width="1">:</td>
-    <td><?= $_SESSION['USER']['nama'] ?></td>
-</tr>
-<div class="card">
-<div class="card-body">
-    <table class="table">
+<div class="container mt-5">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Slip Gaji - <?= htmlspecialchars($nama_karyawan) ?></h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-borderless mb-4">
         <tr>
-            <td>No</td>
-            <td>Nama</td>
-            <td>Jumlah Anak</td>
-            <td>Status Perkawinan</td>
-            <td>Jabatan</td>
-            <td>Gaji Pokok</td>
-            <td>Tunjangan Anak</td>
-            <td>Tunjangan Perkawinan</td>
-            <td>Total Tunjangan</td>
-            <td>Total Gaji Bulan Ini</td>
+          <td width="200">Nama</td>
+          <td width="10">:</td>
+          <td><?= htmlspecialchars($data['nama']) ?></td>
         </tr>
-
-        <?php
-        
-            $absen = $koneksi->prepare("CALL getKaryawan()");
-            $absen->execute();
-
-            foreach ($absen->fetchAll() as $no => $data):
-
-        ?>
-
         <tr>
-            <td><?= $no +1?></td>
-            <td><?= $data['nama'] ?>
-            <td><?= $data['jumlah_anak'] ?>
-            <td><?= $data['status_perkawinan'] ?>
-            <td><?= $data['nama_jabatan'] ?>
-      
+          <td>Jabatan</td>
+          <td>:</td>
+          <td><?= htmlspecialchars($data['nama_jabatan']) ?></td>
         </tr>
+        <tr>
+          <td>Jumlah Anak</td>
+          <td>:</td>
+          <td><?= (int)$data['jumlah_anak'] ?></td>
+        </tr>
+        <tr>
+          <td>Status Perkawinan</td>
+          <td>:</td>
+          <td><?= ucfirst(htmlspecialchars($data['status_perkawinan'])) ?></td>
+        </tr>
+      </table>
 
-        <?php
-            endforeach
-        ?>
-    </table>
+      <h5 class="mb-3">Rincian Gaji Bulan Ini (<?= date('F Y') ?>)</h5>
+      <table class="table table-bordered">
+        <thead class="thead-light">
+          <tr>
+            <th>Hari Masuk</th>
+            <th>Gaji Pokok per Hari</th>
+            <th>Total Gaji</th>
+            <th>Tunjangan Anak</th>
+            <th>Tunjangan Perkawinan</th>
+            <th>Total Tunjangan</th>
+            <th>Total Gaji Bulan Ini</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><?= $jumlah_hari ?> hari</td>
+            <td>Rp <?= number_format($gaji_pokok, 0, ',', '.') ?></td>
+            <td>Rp <?= number_format($total_gaji, 0, ',', '.') ?></td>
+            <td>Rp <?= number_format($tunjangan_anak, 0, ',', '.') ?></td>
+            <td>Rp <?= number_format($tunjangan_perkawinan, 0, ',', '.') ?></td>
+            <td>Rp <?= number_format($total_tunjangan, 0, ',', '.') ?></td>
+            <td><strong>Rp <?= number_format($total_gaji_bulanan, 0, ',', '.') ?></strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a href="absensi.php" class="btn btn-secondary mt-3">Download</a>
+    </div>
+  </div>
 </div>
-</div>
 
-
+<script src="./template/SB Admin 2/vendor/jquery/jquery.min.js"></script>
+<script src="./template/SB Admin 2/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="./template/SB Admin 2/js/sb-admin-2.min.js"></script>
+</body>
+</html>
